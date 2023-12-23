@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  uba.panel.report.api:
+    build:
+      context: "/Volumes/LACIE/projects/dotnet/UBAPanel"
+      dockerfile: "Services/Reports/UBA.Panel.Report.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net6.0/UBA.Panel.Report.Api.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "uba.panel.report.api:dev"
+    ports: []
+    volumes:
+    - "/Users/maciej/.nuget/packages:/root/.nuget/packages"
+    - "/Volumes/LACIE/projects/dotnet/UBAPanel/Services/Reports/UBA.Panel.Report.Api:/app:rw"
+    - "/Volumes/LACIE/projects/dotnet/UBAPanel:/src:rw"
+    working_dir: "/app"
