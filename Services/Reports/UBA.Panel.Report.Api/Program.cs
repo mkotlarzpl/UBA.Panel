@@ -1,3 +1,8 @@
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using UBA.Panel.Report.Infrastructure.Context;
+using UBA.Panel.Report.Infrastructure.Extensions;
+
 namespace UBA.Panel.Report.Api;
 
 public class Program
@@ -12,6 +17,9 @@ public class Program
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddDbContext(builder.Configuration);
+        builder.Services.AddMediatR();
+        builder.Services.AddInfrastructureServices(builder.Configuration);
 
         var app = builder.Build();
 
@@ -29,6 +37,17 @@ public class Program
 
         app.MapControllers();
 
+        using (var scope = app.Services.CreateScope()) 
+        { 
+            var services = scope.ServiceProvider;
+        
+            var context = services.GetRequiredService<ReportsDbContext>(); 
+            context.Database.EnsureCreated();
+            
+            var blobContainerClient = services.GetRequiredService<BlobContainerClient>();
+            blobContainerClient.CreateIfNotExists();
+        }
+        
         app.Run();
     }
 }

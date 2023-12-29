@@ -21,4 +21,8 @@
         </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\UBA.Panel.Report.Api\UBA.Panel.Report.Api.csproj" />
+    </ItemGroup>
+
 </Project>
