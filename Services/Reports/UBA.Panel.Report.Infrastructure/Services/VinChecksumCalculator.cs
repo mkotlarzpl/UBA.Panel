@@ -37,8 +37,6 @@ public class VinChecksumCalculator : IVinChecksumCalculator
 
             checksum += _positionedWeights[index] * charValue;
         }
-
-        Console.WriteLine($"Checksum: {checksum}");
         var checkDigit = checksum % 11;
 
         return checkDigit == 10 ? 'X' : checkDigit.ToString()[0];

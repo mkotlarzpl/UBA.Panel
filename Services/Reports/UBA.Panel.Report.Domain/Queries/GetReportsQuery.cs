@@ -1,5 +1,4 @@
-using MediatR;
-using UBA.Panel.Report.Domain.DTOs;
+using UBA.Panel.Report.Common.DTOs;
 
 namespace UBA.Panel.Report.Domain.Queries;
 

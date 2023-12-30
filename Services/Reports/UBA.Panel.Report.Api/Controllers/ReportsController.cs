@@ -1,7 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using UBA.Panel.Report.Common.DTOs;
 using UBA.Panel.Report.Domain.Commands;
-using UBA.Panel.Report.Domain.DTOs;
 using UBA.Panel.Report.Domain.Queries;
 
 namespace UBA.Panel.Report.Api.Controllers
@@ -71,6 +71,74 @@ namespace UBA.Panel.Report.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        
+        [HttpGet]
+        [Route("details/{reportId}")]
+        public async Task<IActionResult> GetReportDetails(Guid reportId)
+        {
+            try
+            {
+                var query = new GetReportDetailsQuery(reportId);
+                var report = await _mediator.Send(query);
+
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpGet]
+        [Route("details/{reportId}/items/{page}")]
+        public async Task<IActionResult> GetReportItemsForReport(Guid reportId, int page) 
+        {
+            try
+            {
+                var query = new GetReportItemsForReportQuery(reportId, page);
+                var result = await _mediator.Send(query);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpGet]
+        [Route("details/{reportId}/items/{page}/duplicatedVins")]
+        public async Task<IActionResult> GetReportItemsWithDuplicatedVinsForReport(Guid reportId, int page) 
+        {
+            try
+            {
+                var query = new GetReportItemsWithDuplicatedVinsForReportQuery(reportId, page);
+                var result = await _mediator.Send(query);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        [HttpGet]
+        [Route("details/{reportId}/items/{page}/electrics")]
+        public async Task<IActionResult> GetReportItemsElectricsForReport(Guid reportId, int page) 
+        {
+            try
+            {
+                var query = new GetReportItemsElectricsForReportQuery(reportId, page);
+                var result = await _mediator.Send(query);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPut]
         [Route("{reportId}")]
@@ -82,6 +150,24 @@ namespace UBA.Panel.Report.Api.Controllers
                 var command = new AddFileToReportCommand(Guid.Parse(reportId), file.FileName, fileStream);
                 await _mediator.Send(command);
                 fileStream.Close();
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut]
+        [Route("item/status")]
+        public async Task<IActionResult> UpdateReportItemStatus([FromBody] UpdateReportItemStatusDto updateReportItemStatusDto)
+        {
+            try
+            {
+                var command = new UpdateReportItemStatusCommand(updateReportItemStatusDto.ReportItemId,
+                    updateReportItemStatusDto.Status);
+                await _mediator.Send(command);
 
                 return Ok();
             }

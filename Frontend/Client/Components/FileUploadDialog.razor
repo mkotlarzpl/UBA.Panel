@@ -1,0 +1,57 @@
+@inject ISnackbar Snackbar
+@inject HttpClient _httpClient
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Upload file
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudFileUpload T="IBrowserFile" FilesChanged="AddFile">
+            <ButtonTemplate>
+                <MudButton HtmlTag="label"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.CloudUpload"
+                           for="@context.Id">
+                    Upload File
+                </MudButton>
+            </ButtonTemplate>
+        </MudFileUpload>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Success" OnClick="UploadFile">Upload</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    
+    [Parameter] public string ReportId { get; set; }
+
+    private IBrowserFile? _file = null;
+    
+    private void AddFile(IBrowserFile file)
+    {
+        _file = file;
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private async Task UploadFile()
+    {
+        await using var fileStream = _file!.OpenReadStream();
+
+        var multipartContent = new MultipartFormDataContent()
+        {
+            { new StreamContent(fileStream), "file", _file.Name }
+        };
+        
+        await _httpClient.PutAsync($"/api/Reports/{ReportId}", multipartContent);
+        Snackbar.Add("File uploaded", Severity.Success);
+        MudDialog.Close(DialogResult.Ok(string.Empty));
+    }
+}

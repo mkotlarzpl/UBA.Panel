@@ -1,0 +1,168 @@
+@page "/report/{ReportId}"
+@using UBA.Panel.Report.Common.DTOs
+@using UBA.Panel.Frontend.Client.Enums
+@using UBA.Panel.Report.Common.Enums
+@inject HttpClient _httpClient;
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudPaper Elevation="3" Style="margin-top: 10px; margin-bottom: 10px; padding: 10px;">
+    <Loading IsLoading="_isLoading">
+        <MudText Typo="Typo.h5">@_reportDetails?.Name</MudText>
+        
+        <MudForm>
+            <MudRadioGroup @bind-Value="@SelectedFilteringMode">
+                <MudRadio Value="@ReportItemFilteringModeEnum.All" Color="Color.Primary">Primary</MudRadio>
+                <MudRadio Value="@ReportItemFilteringModeEnum.DuplicatedVins" Color="Color.Secondary">Duplicated vins</MudRadio>
+                <MudRadio Value="@ReportItemFilteringModeEnum.Electric">Electric cars</MudRadio>
+            </MudRadioGroup>
+        </MudForm>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OnUploadFileClicked())">Upload file</MudButton>
+        <MudDataGrid T="ReportItemDto" Items="@_reportItems" Style="margin-top: 10px; margin-bottom: 10px;" 
+                     EditMode="DataGridEditMode.Cell"
+                     ReadOnly="false"
+                     CommittedItemChanges="@CommittedItemChanges">
+            <Columns>
+                <PropertyColumn Property="x => x.RowId" Title="Id" IsEditable="false"/>
+                <PropertyColumn Property="x => string.Join(x.FirstName, x.CompanyName)" Title="Name" IsEditable="false"/>
+                <PropertyColumn Property="x => x.CompleteVin" Title="Vin" IsEditable="false"/>
+                <PropertyColumn Property="x => x.IsElectric" Name="Is electric"IsEditable="false"/>
+                <PropertyColumn Property="x => x.MappedVehicleClass" Title="Mapped vehicle class" IsEditable="false"/>
+                <PropertyColumn Property="x => x.Status" Title="Status">
+                    <EditTemplate>
+                            <MudSelect @bind-Value="context.Item.Status" Required RequiredError="You must select a Status!!!" Margin="@Margin.Dense">
+                                            <MudSelectItem Value="@StatusEnum.approved">approved</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.certified">certified</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.not_certified">not_certified</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.paid">paid</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.pending">pending</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.rejected">rejected</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.reviewed">reviewed</MudSelectItem>
+                                            <MudSelectItem Value="@StatusEnum.submitted">submitted</MudSelectItem>
+                            </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+                <TemplateColumn IsEditable="false">
+                    <CellTemplate>
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Save" OnClick="@(() => CommittedItemChanges(context.Item))"/>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+        </MudDataGrid>
+        <MudPagination Color="Color.Primary" 
+                       Count="@(Total/PageSize)"
+                       Selected="@_selectedPage"
+                       SelectedChanged="@((page) => OnSelectedChanges(page))"
+                       />
+    </Loading>
+</MudPaper>
+
+@code {
+    [Parameter] public string ReportId { get; set; } = string.Empty;
+
+    private int _selectedPage = 1;
+    private bool _isLoading = true;
+    private ReportDetailsDto? _reportDetails;
+    private IEnumerable<ReportItemDto> _reportItems = new List<ReportItemDto>();
+    private int Total { get; set; }
+    private int PageSize { get; set; } = 20;
+
+    public ReportItemFilteringModeEnum SelectedFilteringMode
+    {
+        get => _selectedFilteringMode;
+        set
+        {
+            _selectedFilteringMode = value;
+            _selectedPage = 1;
+            LoadData();
+        }
+    }
+    private ReportItemFilteringModeEnum _selectedFilteringMode = ReportItemFilteringModeEnum.All;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnSelectedChanges(int page)
+    {
+        _selectedPage = page;
+        await LoadData();
+    }
+    
+    private async Task CommittedItemChanges(ReportItemDto item)
+    {
+        await _httpClient.PutAsJsonAsync("/api/Reports/item/status", 
+            new UpdateReportItemStatusDto(
+            item.Id,
+            item.Status));
+        Snackbar.Add("Status updated", Severity.Success);
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+        switch (_selectedFilteringMode)
+        {
+            case ReportItemFilteringModeEnum.All:
+                await LoadAllItems(_selectedPage);
+                break;
+            case ReportItemFilteringModeEnum.DuplicatedVins:
+                await LoadDuplicatedVins(_selectedPage);
+                break;
+            case ReportItemFilteringModeEnum.Electric:
+                await LoadElectricsOnly(_selectedPage);
+                break;
+        }
+        
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadAllItems(int page)
+    {
+        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
+            $"/api/Reports/details/{ReportId}/items/{page}");
+
+        _reportItems = result!.Items;
+        Total = result!.Total;
+        PageSize = result!.PageSize;
+        StateHasChanged();
+    }
+    
+    private async Task LoadDuplicatedVins(int page)
+    {
+        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
+            $"/api/Reports/details/{ReportId}/items/{page}/duplicatedVins");
+
+        _reportItems = result!.Items;
+        Total = result!.Total;
+        PageSize = result!.PageSize;
+        StateHasChanged();
+    }
+    
+    private async Task LoadElectricsOnly(int page)
+    {
+        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
+            $"/api/Reports/details/{ReportId}/items/{page}/electrics");
+
+        _reportItems = result!.Items;
+        Total = result!.Total;
+        PageSize = result!.PageSize;
+        StateHasChanged();
+    }
+
+    private async Task OnUploadFileClicked()
+    {
+        var parameters = new DialogParameters<FileUploadDialog> { { x => x.ReportId, ReportId } };
+
+        var dialog = await DialogService.ShowAsync<FileUploadDialog>("Upload file", parameters);
+        var result = await dialog.Result;
+        if (result != DialogResult.Cancel())
+        {
+            await LoadData();
+        }
+    }
+}

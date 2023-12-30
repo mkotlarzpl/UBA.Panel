@@ -1,6 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
-using UBA.Panel.Report.Domain.DTOs;
+using UBA.Panel.Report.Common.DTOs;
 using UBA.Panel.Report.Domain.Interfaces;
 using UBA.Panel.Report.Domain.Queries;
 

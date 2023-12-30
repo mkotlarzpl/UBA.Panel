@@ -1,0 +1,60 @@
+﻿@page "/"
+@using UBA.Panel.Report.Common.DTOs
+@inject HttpClient _httpClient;
+@inject NavigationManager _navManager;
+@inject IDialogService DialogService
+
+<PageTitle>Reports</PageTitle>
+
+<div style="margin-top: 10px; margin-bottom: 10px">
+    <MudText Typo="Typo.h5">Reports</MudText>
+</div>
+<MudPaper Elevation="3" Style="padding: 10px;">
+    <Loading IsLoading="_isLoading">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OnCreateReport())">
+            Create report
+        </MudButton>
+        <MudList Clickable="true">
+            @foreach (var report in Reports)
+            {
+                <MudListItem Text="@report.Name" OnClick='@(() => _navManager.NavigateTo($"/report/{report.Id}"))'/>
+            }
+        </MudList>
+        <MudPagination Color="Color.Primary" Count="1" @bind-Selected="@_selected"/>
+    </Loading>
+</MudPaper>
+
+@code
+{
+    private int _selected = 1;
+    private IEnumerable<ReportDto> Reports { get; set; } = new List<ReportDto>();
+    private bool _isLoading = true;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task OnCreateReport()
+    {
+        var parameters = new DialogParameters<CreateReportDialog>();
+
+        var dialog = await DialogService.ShowAsync<CreateReportDialog>("Create report", parameters);
+        var result = await dialog.Result;
+        if (result != DialogResult.Cancel())
+        {
+            await LoadData();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+        StateHasChanged();
+        Reports = await _httpClient.GetFromJsonAsync<IEnumerable<ReportDto>>($"/api/Reports/all/{_selected}") 
+                   ?? Array.Empty<ReportDto>();
+        _isLoading = false;
+        StateHasChanged();
+    }
+}

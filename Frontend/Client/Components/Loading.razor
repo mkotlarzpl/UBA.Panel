@@ -1,0 +1,15 @@
+@if (IsLoading)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    @ChildContent
+}
+@code {
+    [Parameter]
+    public bool IsLoading { get; set; }
+    
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}
