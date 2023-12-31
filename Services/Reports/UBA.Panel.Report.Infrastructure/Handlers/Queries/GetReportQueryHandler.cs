@@ -19,7 +19,7 @@ public class GetReportQueryHandler : IRequestHandler<GetReportQuery, ReportDto?>
     
     public async Task<ReportDto?> Handle(GetReportQuery request, CancellationToken cancellationToken)
     {
-        var result = await _repository.GetReportByNameAsync(request.Name);
+        var result = await _repository.GetReportAsync((r) => r.Name == request.Name);
         return result == null ? null : new ReportDto(Id: result.Id, Name: result.Name);
     }
 }

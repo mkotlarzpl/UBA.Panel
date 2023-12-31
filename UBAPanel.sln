@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UBA.Panel.Frontend.Server",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UBA.Panel.Frontend.Shared", "Frontend\Shared\UBA.Panel.Frontend.Shared.csproj", "{8D9D6222-E30F-40CD-809B-FFF0C829563F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UBA.Panel.Report.Excel", "Services\Reports\UBA.Panel.Report.Excel\UBA.Panel.Report.Excel.csproj", "{E04B39B6-2A23-4796-B763-A44C1787CAFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,7 @@ Global
 		{4B271FC9-5BB9-434C-AE02-32C078B19F4A} = {E0A72528-84E5-43FD-8B05-9D986DD70C07}
 		{BD9CAF39-DB4D-4264-8FB4-250EE5A35479} = {E0A72528-84E5-43FD-8B05-9D986DD70C07}
 		{8D9D6222-E30F-40CD-809B-FFF0C829563F} = {E0A72528-84E5-43FD-8B05-9D986DD70C07}
+		{E04B39B6-2A23-4796-B763-A44C1787CAFA} = {AF899339-0F4E-44A7-8244-36797470D6F3}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{0805B87D-4087-4D21-8D4A-922588A5B1E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -81,5 +84,9 @@ Global
 		{8D9D6222-E30F-40CD-809B-FFF0C829563F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D9D6222-E30F-40CD-809B-FFF0C829563F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D9D6222-E30F-40CD-809B-FFF0C829563F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E04B39B6-2A23-4796-B763-A44C1787CAFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E04B39B6-2A23-4796-B763-A44C1787CAFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E04B39B6-2A23-4796-B763-A44C1787CAFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E04B39B6-2A23-4796-B763-A44C1787CAFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

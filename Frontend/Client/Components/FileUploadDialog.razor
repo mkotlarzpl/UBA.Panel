@@ -1,5 +1,5 @@
 @inject ISnackbar Snackbar
-@inject HttpClient _httpClient
+@inject HttpClient HttpClient
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -25,9 +25,9 @@
     </DialogActions>
 </MudDialog>
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
-    
-    [Parameter] public string ReportId { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public string ReportId { get; set; } = null!;
 
     private IBrowserFile? _file = null;
     
@@ -50,7 +50,7 @@
             { new StreamContent(fileStream), "file", _file.Name }
         };
         
-        await _httpClient.PutAsync($"/api/Reports/{ReportId}", multipartContent);
+        await HttpClient.PutAsync($"/api/Reports/{ReportId}", multipartContent);
         Snackbar.Add("File uploaded", Severity.Success);
         MudDialog.Close(DialogResult.Ok(string.Empty));
     }

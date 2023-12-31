@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using UBA.Panel.Report.Common.Enums;
 using UBA.Panel.Report.Domain.Data.ValueObjects;
@@ -23,14 +24,9 @@ public class ReportsRepository : IReportsRepository
         return report;
     }
 
-    public Task<Domain.Data.AggregateRoots.Report?> GetReportByNameAsync(string name)
+    public Task<Domain.Data.AggregateRoots.Report?> GetReportAsync(Expression<Func<Domain.Data.AggregateRoots.Report, bool>> whereClause)
     {
-        return _context.Reports.FirstOrDefaultAsync(r => r.Name == name);
-    }
-
-    public Task<Domain.Data.AggregateRoots.Report?> GetReportByIdAsync(Guid id)
-    {
-        return _context.Reports.FirstOrDefaultAsync(r => r.Id == id);
+        return _context.Reports.FirstOrDefaultAsync(whereClause);
     }
 
     public async Task<Domain.Data.AggregateRoots.Report> UpdateReportAsync(Domain.Data.AggregateRoots.Report report)
@@ -41,21 +37,56 @@ public class ReportsRepository : IReportsRepository
         return report;
     }
 
-    public IEnumerable<Domain.Data.AggregateRoots.Report> GetReports(int page, int pageSize = 20)
+    public IEnumerable<Domain.Data.AggregateRoots.Report> GetReports(int page, Expression<Func<Domain.Data.AggregateRoots.Report, bool>>? whereClause = null)
     {
-        return _context.Reports.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+        IQueryable<Domain.Data.AggregateRoots.Report> query = _context.Reports;
+        if (whereClause != null)
+        {
+            query = query.Where(whereClause);
+        }
+        
+        return query
+            .Skip((page - 1) * IReportsRepository.DefaultPageSize).
+            Take(IReportsRepository.DefaultPageSize)
+            .ToList();
+    }
+    
+    public async Task<Domain.Data.AggregateRoots.Report> GetReportWithDetails(
+        Expression<Func<Domain.Data.AggregateRoots.Report, bool>>? whereClause = null,
+        int? reportItemsPageSize = 20)
+    {
+        IQueryable<Domain.Data.AggregateRoots.Report> query = _context.Reports;
+        query = reportItemsPageSize == null ? 
+            query.Include(r => r.ReportItems.Where((ri) => ri.Status == StatusEnum.not_certified)) : 
+            query.Include(r => r.ReportItems.Where((ri) => ri.Status == StatusEnum.not_certified))
+                .Take(reportItemsPageSize.Value);
+        
+        return (await query.FirstOrDefaultAsync(whereClause ?? ((r) => true)))!;
     }
 
-    public async Task<Domain.Data.AggregateRoots.Report> GetReportWithDetails(Guid reportId)
+    public async Task<Domain.Data.AggregateRoots.Report> GetReportWithDetailsForNotCertified(
+        Expression<Func<Domain.Data.AggregateRoots.Report, bool>>? whereClause = null,
+        int? reportItemsPageSize = 20)
     {
-        return (await _context.Reports
-            .Include(r => r.ReportItems.Take(20))
-            .FirstOrDefaultAsync(r => r.Id == reportId))!;
+        IQueryable<Domain.Data.AggregateRoots.Report> query = _context.Reports;
+        query = reportItemsPageSize == null ? 
+            query.Include(r => r.ReportItems.Where((ri) => ri.Status == StatusEnum.not_certified)) : 
+            query.Include(r => r.ReportItems.Where((ri) => ri.Status == StatusEnum.not_certified))
+                .Take(reportItemsPageSize.Value);
+        
+        return (await query.FirstOrDefaultAsync(whereClause ?? ((r) => true)))!;
     }
 
-    public IEnumerable<ReportItem> GetReportItemsForReport(Guid reportId, int page)
+    public IEnumerable<ReportItem> GetReportItemsForReport(Expression<Func<ReportItem, bool>> whereClause, int page)
     {
-        return _context.ReportItems.Where(ri => ri.ReportId == reportId)
+        IQueryable<ReportItem> query = _context.ReportItems;
+
+        if (whereClause != null)
+        {
+            query = query.Where(whereClause);
+        }
+        
+        return query
             .Skip((page - 1) * IReportsRepository.DefaultPageSize)
             .Take(IReportsRepository.DefaultPageSize);
     }
@@ -65,14 +96,6 @@ public class ReportsRepository : IReportsRepository
         return _context.ReportItems
             .Where(items => items.ReportId == reportId &&
                             _context.ReportItems.Count(duplicated => items.Vin == duplicated.Vin) > 1)
-            .Skip((page - 1) * IReportsRepository.DefaultPageSize)
-            .Take(IReportsRepository.DefaultPageSize);
-    }
-
-    public IEnumerable<ReportItem> GetReportItemsElectricsForReport(Guid reportId, int page)
-    {
-        return _context.ReportItems
-            .Where(items => items.ReportId == reportId && items.IsElectric == true)
             .Skip((page - 1) * IReportsRepository.DefaultPageSize)
             .Take(IReportsRepository.DefaultPageSize);
     }

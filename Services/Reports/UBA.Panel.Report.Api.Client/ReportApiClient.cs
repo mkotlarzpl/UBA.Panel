@@ -63,4 +63,9 @@ public class ReportApiClient : IReportApiClient
         
         return await _httpClient.PutAsync($"/api/Reports/{reportId}", multipartContent);
     }
+
+    public async Task<HttpResponseMessage> DownloadReport(Guid reportId, string format)
+    {
+        return await _httpClient.GetAsync($"/api/Reports/download/{reportId}/{format}");
+    }
 }

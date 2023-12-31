@@ -78,5 +78,16 @@ namespace UBA.Panel.Frontend.Server.Controllers
             await _reportApiClient.UploadFile(reportId, file.FileName, fileStream);
             return Ok();
         }
+
+        [HttpGet]
+        [Route("download/{reportId}/{fileName}/{format}")]
+        public async Task<IActionResult> DownloadReport(string reportId, string fileName, string format)
+        {
+            var response = await _reportApiClient.DownloadReport(Guid.Parse(reportId), format);
+            
+            return File(await response.Content.ReadAsStreamAsync(), 
+                "application/octet-stream", 
+                $"{fileName}.{format}");
+        }
     }
 }

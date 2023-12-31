@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using UBA.Panel.Report.Common.DTOs
-@inject HttpClient _httpClient;
-@inject NavigationManager _navManager;
+@inject HttpClient HttpClient;
+@inject NavigationManager NavManager;
 @inject IDialogService DialogService
 
 <PageTitle>Reports</PageTitle>
@@ -17,7 +17,7 @@
         <MudList Clickable="true">
             @foreach (var report in Reports)
             {
-                <MudListItem Text="@report.Name" OnClick='@(() => _navManager.NavigateTo($"/report/{report.Id}"))'/>
+                <MudListItem Text="@report.Name" OnClick='@(() => NavManager.NavigateTo($"/report/{report.Id}"))'/>
             }
         </MudList>
         <MudPagination Color="Color.Primary" Count="1" @bind-Selected="@_selected"/>
@@ -52,7 +52,7 @@
     {
         _isLoading = true;
         StateHasChanged();
-        Reports = await _httpClient.GetFromJsonAsync<IEnumerable<ReportDto>>($"/api/Reports/all/{_selected}") 
+        Reports = await HttpClient.GetFromJsonAsync<IEnumerable<ReportDto>>($"/api/Reports/all/{_selected}") 
                    ?? Array.Empty<ReportDto>();
         _isLoading = false;
         StateHasChanged();

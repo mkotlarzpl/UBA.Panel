@@ -4,6 +4,7 @@ using UBA.Panel.Report.Common.DTOs;
 using UBA.Panel.Report.Domain.Data.ValueObjects;
 using UBA.Panel.Report.Domain.Interfaces;
 using UBA.Panel.Report.Domain.Queries;
+using UBA.Panel.Report.Infrastructure.Interfaces;
 
 namespace UBA.Panel.Report.Infrastructure.Handlers.Queries;
 
@@ -11,13 +12,13 @@ public class GetReportItemsWithDuplicatedVinsForReportQueryHandler :
     IRequestHandler<GetReportItemsWithDuplicatedVinsForReportQuery, PagedResultDto<ReportItemDto>>
 {
     private readonly IReportsRepository _repository;
-    private readonly ILogger<GetReportItemsWithDuplicatedVinsForReportQuery> _logger;
+    private readonly IReportItemDtoFactory _reportItemDtoFactory;
 
     public GetReportItemsWithDuplicatedVinsForReportQueryHandler(IReportsRepository repository,
-        ILogger<GetReportItemsWithDuplicatedVinsForReportQuery> logger)
+        IReportItemDtoFactory reportItemDtoFactory)
     {
         _repository = repository;
-        _logger = logger;
+        _reportItemDtoFactory = reportItemDtoFactory;
     }
     
     public Task<PagedResultDto<ReportItemDto>> Handle(GetReportItemsWithDuplicatedVinsForReportQuery request, CancellationToken cancellationToken)
@@ -26,23 +27,6 @@ public class GetReportItemsWithDuplicatedVinsForReportQueryHandler :
         var totalItems = _repository.GetRecordItemsTotalForReport(request.ReportId);
 
         return Task.FromResult(new PagedResultDto<ReportItemDto>(request.Page, totalItems, IReportsRepository.DefaultPageSize,
-            reportItems.Select(CreateReportItemDto)));
+            reportItems.Select(_reportItemDtoFactory.Create)));
     }
-
-    private ReportItemDto CreateReportItemDto(ReportItem ri) =>
-        new ReportItemDto
-        {
-            Id = ri.Id,
-            RowId = ri.RowId,
-            FirstName = ri.FirstName,
-            CompanyName = ri.CompanyName,
-            Vin = ri.Vin,
-            VinCheckDigit = ri.VinCheckDigit,
-            CompleteVin = ri.VinWithCheckDigit,
-            IsElectric = ri.IsElectric,
-            MappedVehicleClass = ri.MappedVehicleClass,
-            FrontFile = ri.FrontFile,
-            Status = ri.Status,
-            Source = ri.Source   
-        };
 }

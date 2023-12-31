@@ -8,12 +8,10 @@ namespace UBA.Panel.Report.Infrastructure.Handlers.Commands;
 public class UpdateReportItemStatusCommandHandler : IRequestHandler<UpdateReportItemStatusCommand>
 {
     private readonly IReportsRepository _repository;
-    private readonly ILogger<UpdateReportItemStatusCommandHandler> _logger;
 
-    public UpdateReportItemStatusCommandHandler(IReportsRepository repository, ILogger<UpdateReportItemStatusCommandHandler> logger)
+    public UpdateReportItemStatusCommandHandler(IReportsRepository repository)
     {
         _repository = repository;
-        _logger = logger;
     }
     
     public async Task Handle(UpdateReportItemStatusCommand request, CancellationToken cancellationToken)

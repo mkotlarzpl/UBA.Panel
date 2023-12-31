@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UBA.Panel.Report.Domain.Interfaces;
 using UBA.Panel.Report.Infrastructure.Context;
+using UBA.Panel.Report.Infrastructure.Factories;
+using UBA.Panel.Report.Infrastructure.Interfaces;
 using UBA.Panel.Report.Infrastructure.Repositories;
 using UBA.Panel.Report.Infrastructure.Services;
 
@@ -32,6 +34,8 @@ public static class DependencyInjectionExtensions
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection serviceCollection, IConfiguration configuration)
     {
         return serviceCollection
+            .AddTransient<IReportItemDtoFactory, ReportItemDtoFactory>()
+            .AddScoped<IReportExporterFactory, ReportExporterFactory>()
             .AddScoped<BlobContainerClient>(_ => 
                 new BlobContainerClient(
                     configuration["FileStore:ConnectionString"],

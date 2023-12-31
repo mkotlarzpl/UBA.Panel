@@ -1,7 +1,10 @@
+using System.Data.Common;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol;
 using UBA.Panel.Report.Common.DTOs;
 using UBA.Panel.Report.Domain.Commands;
+using UBA.Panel.Report.Domain.Exceptions;
 using UBA.Panel.Report.Domain.Queries;
 
 namespace UBA.Panel.Report.Api.Controllers
@@ -10,11 +13,13 @@ namespace UBA.Panel.Report.Api.Controllers
     [ApiController]
     public class ReportsController : ControllerBase
     {
-        private IMediator _mediator;
+        private readonly IMediator _mediator;
+        private readonly ILogger<ReportsController> _logger;
 
-        public ReportsController(IMediator mediator)
+        public ReportsController(IMediator mediator, ILogger<ReportsController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
         
         [HttpPost]
@@ -25,11 +30,18 @@ namespace UBA.Panel.Report.Api.Controllers
                 var command = new CreateReportCommand(createReportDto.Name);
                 var reportId = await _mediator.Send(command);
 
+                _logger.LogInformation($"Report with name: {command.Name} and Id: {reportId} has been created");
                 return Created($"/api/reports/{reportId}", null);
+            }
+            catch (NotUniqueEntryException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                _logger.LogError(ex, ex.Message);
+                return Problem(ex.Message);
             }
         }
 
@@ -51,7 +63,7 @@ namespace UBA.Panel.Report.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
 
@@ -81,11 +93,16 @@ namespace UBA.Panel.Report.Api.Controllers
                 var query = new GetReportDetailsQuery(reportId);
                 var report = await _mediator.Send(query);
 
+                if (report == null)
+                {
+                    return NotFound();
+                }
+
                 return Ok(report);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
         
@@ -102,7 +119,7 @@ namespace UBA.Panel.Report.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
         
@@ -119,7 +136,7 @@ namespace UBA.Panel.Report.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
         
@@ -136,7 +153,7 @@ namespace UBA.Panel.Report.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
 
@@ -153,9 +170,13 @@ namespace UBA.Panel.Report.Api.Controllers
 
                 return Ok();
             }
+            catch (NullReferenceException ex)
+            {
+                return NotFound();
+            }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return Problem(ex.Message);
             }
         }
 
@@ -175,6 +196,21 @@ namespace UBA.Panel.Report.Api.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet]
+        [Route("download/{reportId}/{format}")]
+        public async Task<IActionResult> DownloadReport(Guid reportId, string format)
+        {
+            if (format != "xlsx")
+            {
+                return BadRequest("Only supported format is xlsx");
+            }
+
+            var query = new DownloadReportQuery(reportId, format);
+            var result = await _mediator.Send(query);
+
+            return File(result.ToArray(), "application/octet-stream", "sheet.xlsx");
         }
     }
 }

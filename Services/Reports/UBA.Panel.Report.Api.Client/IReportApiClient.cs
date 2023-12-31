@@ -12,4 +12,5 @@ public interface IReportApiClient
     Task<PagedResultDto<ReportItemDto>> GetReportItemsElectricsForReport(Guid report, int page);
     Task<HttpResponseMessage> UpdateReportItemStatus(UpdateReportItemStatusDto updateReportItemStatusDto);
     Task<HttpResponseMessage> UploadFile(Guid reportId, string fileName, Stream fileStream);
+    Task<HttpResponseMessage> DownloadReport(Guid reportId, string format);
 }

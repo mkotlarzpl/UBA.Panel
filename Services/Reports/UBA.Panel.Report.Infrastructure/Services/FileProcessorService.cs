@@ -48,7 +48,7 @@ public class FileProcessorService : IFileProcessorService
 
     private async Task ParseFile(Guid reportId, string fileName, CsvReader csvReader)
     {
-        var report = await _repository.GetReportByIdAsync(reportId);
+        var report = await _repository.GetReportAsync((r) => r.Id == reportId);
 
         if (report == null)
         {
@@ -72,5 +72,10 @@ public class FileProcessorService : IFileProcessorService
         
         await targetBlobClient.UploadAsync(streamReader.BaseStream);
         await sourceBlobClient.DeleteAsync();
+    }
+
+    public Task Process(Guid reportId, string fileName, MemoryStream memoryStream)
+    {
+        throw new NotImplementedException();
     }
 }

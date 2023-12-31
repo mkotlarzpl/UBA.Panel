@@ -2,14 +2,19 @@
 @using UBA.Panel.Report.Common.DTOs
 @using UBA.Panel.Frontend.Client.Enums
 @using UBA.Panel.Report.Common.Enums
-@inject HttpClient _httpClient;
+@inject HttpClient HttpClient;
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
+@inject NavigationManager NavManager
 
 <MudPaper Elevation="3" Style="margin-top: 10px; margin-bottom: 10px; padding: 10px;">
     <Loading IsLoading="_isLoading">
-        <MudText Typo="Typo.h5">@_reportDetails?.Name</MudText>
-        
+        <MudText Typo="Typo.h5">@Report?.Name</MudText>
+        <a href='@($"/api/Reports/download/{ReportId}/{Report?.Name}/xlsx")'>
+            <MudButton Variant="Variant.Filled" Color="Color.Secondary">
+                Download report
+            </MudButton>
+        </a>
         <MudForm>
             <MudRadioGroup @bind-Value="@SelectedFilteringMode">
                 <MudRadio Value="@ReportItemFilteringModeEnum.All" Color="Color.Primary">Primary</MudRadio>
@@ -26,7 +31,7 @@
                 <PropertyColumn Property="x => x.RowId" Title="Id" IsEditable="false"/>
                 <PropertyColumn Property="x => string.Join(x.FirstName, x.CompanyName)" Title="Name" IsEditable="false"/>
                 <PropertyColumn Property="x => x.CompleteVin" Title="Vin" IsEditable="false"/>
-                <PropertyColumn Property="x => x.IsElectric" Name="Is electric"IsEditable="false"/>
+                <PropertyColumn Property="x => x.IsElectric" Name="Is electric" IsEditable="false"/>
                 <PropertyColumn Property="x => x.MappedVehicleClass" Title="Mapped vehicle class" IsEditable="false"/>
                 <PropertyColumn Property="x => x.Status" Title="Status">
                     <EditTemplate>
@@ -62,7 +67,7 @@
 
     private int _selectedPage = 1;
     private bool _isLoading = true;
-    private ReportDetailsDto? _reportDetails;
+    public ReportDetailsDto? Report { get; set; }
     private IEnumerable<ReportItemDto> _reportItems = new List<ReportItemDto>();
     private int Total { get; set; }
     private int PageSize { get; set; } = 20;
@@ -81,7 +86,21 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadData();
+        var result = await HttpClient.GetFromJsonAsync<ReportDetailsDto>(
+            $"/api/Reports/details/{ReportId}");
+
+        if (result == null)
+        {
+            Snackbar.Add("Failed to load data", Severity.Error);
+            return;
+        }
+
+        Report = result;
+        _reportItems = result.ReportItems.Items;
+        Total = result.ReportItems.Total;
+        PageSize = result.ReportItems.PageSize;
+        _isLoading = false;
+        StateHasChanged();
         await base.OnInitializedAsync();
     }
 
@@ -93,7 +112,7 @@
     
     private async Task CommittedItemChanges(ReportItemDto item)
     {
-        await _httpClient.PutAsJsonAsync("/api/Reports/item/status", 
+        await HttpClient.PutAsJsonAsync("/api/Reports/item/status", 
             new UpdateReportItemStatusDto(
             item.Id,
             item.Status));
@@ -107,13 +126,13 @@
         switch (_selectedFilteringMode)
         {
             case ReportItemFilteringModeEnum.All:
-                await LoadAllItems(_selectedPage);
+                await FetchDataFromBackend($"/api/Reports/details/{ReportId}/items/{_selectedPage}");
                 break;
             case ReportItemFilteringModeEnum.DuplicatedVins:
-                await LoadDuplicatedVins(_selectedPage);
+                await FetchDataFromBackend($"/api/Reports/details/{ReportId}/items/{_selectedPage}/duplicatedVins");
                 break;
             case ReportItemFilteringModeEnum.Electric:
-                await LoadElectricsOnly(_selectedPage);
+                await FetchDataFromBackend($"/api/Reports/details/{ReportId}/items/{_selectedPage}/electrics");
                 break;
         }
         
@@ -121,36 +140,19 @@
         StateHasChanged();
     }
 
-    private async Task LoadAllItems(int page)
+    private async Task FetchDataFromBackend(string url)
     {
-        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
-            $"/api/Reports/details/{ReportId}/items/{page}");
+        var result = await HttpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(url);
 
-        _reportItems = result!.Items;
-        Total = result!.Total;
-        PageSize = result!.PageSize;
-        StateHasChanged();
-    }
-    
-    private async Task LoadDuplicatedVins(int page)
-    {
-        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
-            $"/api/Reports/details/{ReportId}/items/{page}/duplicatedVins");
+        if (result == null)
+        {
+            Snackbar.Add("Failed to load data", Severity.Error);
+            return;
+        }
 
-        _reportItems = result!.Items;
-        Total = result!.Total;
-        PageSize = result!.PageSize;
-        StateHasChanged();
-    }
-    
-    private async Task LoadElectricsOnly(int page)
-    {
-        var result = await _httpClient.GetFromJsonAsync<PagedResultDto<ReportItemDto>>(
-            $"/api/Reports/details/{ReportId}/items/{page}/electrics");
-
-        _reportItems = result!.Items;
-        Total = result!.Total;
-        PageSize = result!.PageSize;
+        _reportItems = result.Items;
+        Total = result.Total;
+        PageSize = result.PageSize;
         StateHasChanged();
     }
 

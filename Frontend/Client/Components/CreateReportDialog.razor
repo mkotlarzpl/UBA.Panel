@@ -1,6 +1,6 @@
 @using UBA.Panel.Report.Common.DTOs
 @inject ISnackbar Snackbar
-@inject HttpClient _httpClient
+@inject HttpClient HttpClient
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
@@ -8,7 +8,7 @@
         </MudText>
     </TitleContent>
     <DialogContent>
-        <MudTextField @bind-Value="@_reportName" Label="Report name" />
+        <MudTextField @bind-Value="@ReportName" Label="Report name" />
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -16,9 +16,9 @@
     </DialogActions>
 </MudDialog>
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
 
-    private string _reportName { get; set; } = string.Empty;
+    private string ReportName { get; set; } = string.Empty;
 
     private void Cancel()
     {
@@ -27,8 +27,8 @@
 
     private async Task CreateReport()
     {
-        var dto = new CreateReportDto(_reportName);
-        await _httpClient.PostAsJsonAsync("/api/reports", dto);
+        var dto = new CreateReportDto(ReportName);
+        await HttpClient.PostAsJsonAsync("/api/reports", dto);
         await Task.Delay(TimeSpan.FromSeconds(2));
         Snackbar.Add("Report created", Severity.Success);
         MudDialog.Close(DialogResult.Ok(string.Empty));
