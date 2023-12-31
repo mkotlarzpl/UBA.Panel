@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using UBA.Panel.Report.Api.Client;
 using UBA.Panel.Report.Common.DTOs;
@@ -18,7 +19,13 @@ namespace UBA.Panel.Frontend.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateReport(CreateReportDto createReportDto)
         {
-            await _reportApiClient.CreateReportAsync(createReportDto);
+            var response = await _reportApiClient.CreateReportAsync(createReportDto);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                return response.StatusCode == HttpStatusCode.BadRequest ? BadRequest(await response.Content.ReadAsStringAsync()) : Problem(await response.Content.ReadAsStringAsync());
+            }
+            
             return Ok();
         }
 
@@ -35,6 +42,12 @@ namespace UBA.Panel.Frontend.Server.Controllers
         public async Task<IActionResult> GetReportDetails(Guid reportId)
         {
             var result = await _reportApiClient.GetReportDetails(reportId);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+            
             return Ok(result);
         }
 
@@ -59,6 +72,7 @@ namespace UBA.Panel.Frontend.Server.Controllers
         public async Task<IActionResult> GetReportItemsElectricsForReport(Guid reportId, int page)
         {
             var result = await _reportApiClient.GetReportItemsElectricsForReport(reportId, page);
+            
             return Ok(result);
         }
         
@@ -67,6 +81,12 @@ namespace UBA.Panel.Frontend.Server.Controllers
         public async Task<IActionResult> UpdateReportItemStatus([FromBody] UpdateReportItemStatusDto updateReportItemStatusDto)
         {
             var response = await _reportApiClient.UpdateReportItemStatus(updateReportItemStatusDto);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                return response.StatusCode == HttpStatusCode.BadRequest ? BadRequest(await response.Content.ReadAsStringAsync()) : Problem(await response.Content.ReadAsStringAsync());
+            }
+            
             return Ok(response);
         }
 
@@ -75,7 +95,13 @@ namespace UBA.Panel.Frontend.Server.Controllers
         public async Task<IActionResult> AddFileToReport(Guid reportId, IFormFile file)
         {
             await using var fileStream = file.OpenReadStream();
-            await _reportApiClient.UploadFile(reportId, file.FileName, fileStream);
+            var response = await _reportApiClient.UploadFile(reportId, file.FileName, fileStream);
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                return response.StatusCode == HttpStatusCode.BadRequest ? BadRequest(await response.Content.ReadAsStringAsync()) : Problem(await response.Content.ReadAsStringAsync());
+            }
+            
             return Ok();
         }
 
@@ -84,6 +110,11 @@ namespace UBA.Panel.Frontend.Server.Controllers
         public async Task<IActionResult> DownloadReport(string reportId, string fileName, string format)
         {
             var response = await _reportApiClient.DownloadReport(Guid.Parse(reportId), format);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Problem();
+            }
             
             return File(await response.Content.ReadAsStreamAsync(), 
                 "application/octet-stream", 

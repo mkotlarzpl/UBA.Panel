@@ -28,8 +28,15 @@
     private async Task CreateReport()
     {
         var dto = new CreateReportDto(ReportName);
-        await HttpClient.PostAsJsonAsync("/api/reports", dto);
-        await Task.Delay(TimeSpan.FromSeconds(2));
+        var response = await HttpClient.PostAsJsonAsync("/api/reports", dto);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(await response.Content.ReadAsStringAsync(), Severity.Error);
+            MudDialog.Close(DialogResult.Cancel());
+            return;
+        }
+        
         Snackbar.Add("Report created", Severity.Success);
         MudDialog.Close(DialogResult.Ok(string.Empty));
     }

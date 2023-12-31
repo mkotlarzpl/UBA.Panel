@@ -6,7 +6,7 @@ public interface IReportApiClient
 {
     Task<HttpResponseMessage> CreateReportAsync(CreateReportDto createReportDto);
     Task<IEnumerable<ReportDto>> GetReports(int page);
-    Task<ReportDetailsDto> GetReportDetails(Guid reportId);
+    Task<ReportDetailsDto?> GetReportDetails(Guid reportId);
     Task<PagedResultDto<ReportItemDto>> GetReportItems(Guid report, int page);
     Task<PagedResultDto<ReportItemDto>> GetReportItemsWithDuplicatedVin(Guid report, int page);
     Task<PagedResultDto<ReportItemDto>> GetReportItemsElectricsForReport(Guid report, int page);

@@ -1,5 +1,4 @@
 using System.Net.Http.Json;
-using Newtonsoft.Json;
 using UBA.Panel.Report.Api.Client.Config;
 using UBA.Panel.Report.Common.DTOs;
 
@@ -26,9 +25,9 @@ public class ReportApiClient : IReportApiClient
                ?? Array.Empty<ReportDto>();
     }
 
-    public async Task<ReportDetailsDto> GetReportDetails(Guid reportId)
+    public async Task<ReportDetailsDto?> GetReportDetails(Guid reportId)
     {
-        return (await _httpClient.GetFromJsonAsync<ReportDetailsDto>($"/api/Reports/details/{reportId}"))!;
+        return await _httpClient.GetFromJsonAsync<ReportDetailsDto>($"/api/Reports/details/{reportId}");
     }
 
     public async Task<PagedResultDto<ReportItemDto>> GetReportItems(Guid reportId, int page)

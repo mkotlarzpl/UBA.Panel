@@ -112,10 +112,17 @@
     
     private async Task CommittedItemChanges(ReportItemDto item)
     {
-        await HttpClient.PutAsJsonAsync("/api/Reports/item/status", 
+        var response = await HttpClient.PutAsJsonAsync("/api/Reports/item/status", 
             new UpdateReportItemStatusDto(
             item.Id,
             item.Status));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(await response.Content.ReadAsStringAsync(), Severity.Error);
+            return;
+        }
+        
         Snackbar.Add("Status updated", Severity.Success);
     }
 

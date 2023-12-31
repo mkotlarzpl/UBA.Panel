@@ -19,7 +19,6 @@ public class ExcelReportExporterService : IReportExporterService
         currentRow++;
 
         var reportItems = report.ReportItems.ToList();
-        Console.WriteLine(reportItems.Count);
         foreach (var reportItem in reportItems)
         {
             AddRow(reportItem, currentRow, worksheet);

@@ -50,8 +50,16 @@
             { new StreamContent(fileStream), "file", _file.Name }
         };
         
-        await HttpClient.PutAsync($"/api/Reports/{ReportId}", multipartContent);
-        Snackbar.Add("File uploaded", Severity.Success);
+        var response = await HttpClient.PutAsync($"/api/Reports/{ReportId}", multipartContent);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add(await response.Content.ReadAsStringAsync(), Severity.Error);
+            MudDialog.Close(DialogResult.Cancel());
+            return;
+        }
+        
+        Snackbar.Add("File uploaded. New items should visible in few minutes", Severity.Success);
         MudDialog.Close(DialogResult.Ok(string.Empty));
     }
 }

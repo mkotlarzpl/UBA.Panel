@@ -202,15 +202,23 @@ namespace UBA.Panel.Report.Api.Controllers
         [Route("download/{reportId}/{format}")]
         public async Task<IActionResult> DownloadReport(Guid reportId, string format)
         {
-            if (format != "xlsx")
+            try
             {
-                return BadRequest("Only supported format is xlsx");
+                if (format != "xlsx")
+                {
+                    return BadRequest("Only supported format is xlsx");
+                }
+
+                var query = new DownloadReportQuery(reportId, format);
+                var result = await _mediator.Send(query);
+
+                return File(result.ToArray(), "application/octet-stream", "sheet.xlsx");
             }
-
-            var query = new DownloadReportQuery(reportId, format);
-            var result = await _mediator.Send(query);
-
-            return File(result.ToArray(), "application/octet-stream", "sheet.xlsx");
-        }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return Problem();
+            }
+        } 
     }
 }
