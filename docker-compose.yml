@@ -37,8 +37,15 @@ services:
       - azurite
     networks:
       - uba_panel
+  uba.panel.report.fileprocessor.functions:
+    image: ${DOCKER_REGISTRY-}ubapanelreportfileprocessorfunctions
+    build:
+      context: .
+      dockerfile: Services/Reports/UBA.Panel.Report.FileProcessor.Functions/Dockerfile
+
 networks:
   uba_panel:
 volumes:
   db:
     driver: local
+

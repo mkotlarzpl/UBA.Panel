@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "uba.panel.report.api": "StartDebugging",
+        "uba.panel.report.fileprocessor.functions": "StartDebugging"
+      }
+    }
+  }
+}

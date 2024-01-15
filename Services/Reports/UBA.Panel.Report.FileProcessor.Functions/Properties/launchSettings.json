@@ -2,8 +2,13 @@
   "profiles": {
     "UBA.Panel.Report.FileProcessor.Functions": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7264",
-      "launchBrowser": false
+      "commandLineArgs": "--port 7264"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 30690,
+      "useSSL": false
     }
   }
 }
