@@ -1,5 +1,4 @@
 using Azure.Storage.Blobs;
-using Microsoft.Extensions.DependencyInjection;
 using UBA.Panel.Report.Domain.Interfaces;
 
 namespace UBA.Panel.Report.Infrastructure.Services;
@@ -8,7 +7,7 @@ public class FileUploaderService : IFileUploaderService
 {
     private readonly BlobContainerClient _containerClient;
 
-    public FileUploaderService([FromKeyedServices("source_file_uploader")] BlobContainerClient containerClient)
+    public FileUploaderService(BlobContainerClient containerClient)
     {
         _containerClient = containerClient;
     }

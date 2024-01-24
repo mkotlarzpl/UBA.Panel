@@ -36,7 +36,7 @@ public static class DependencyInjectionExtensions
         return serviceCollection
             .AddTransient<IReportItemDtoFactory, ReportItemDtoFactory>()
             .AddScoped<IReportExporterFactory, ReportExporterFactory>()
-            .AddScoped<BlobContainerClient>(_ => 
+            .AddScoped(_ => 
                 new BlobContainerClient(
                     configuration["FileStore:ConnectionString"],
                     configuration["FileStore:ContainerName"]))

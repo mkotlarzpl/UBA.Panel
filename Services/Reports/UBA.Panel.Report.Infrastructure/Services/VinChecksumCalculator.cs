@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using UBA.Panel.Report.Domain.Interfaces;
 
 namespace UBA.Panel.Report.Infrastructure.Services;
