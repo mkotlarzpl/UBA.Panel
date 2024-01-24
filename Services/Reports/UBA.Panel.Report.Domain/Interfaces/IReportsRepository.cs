@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Linq.Expressions;
-using UBA.Panel.Report.Common.DTOs;
 using UBA.Panel.Report.Common.Enums;
 using UBA.Panel.Report.Domain.Data.ValueObjects;
 using UBAReport = UBA.Panel.Report.Domain.Data.AggregateRoots.Report;
