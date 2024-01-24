@@ -42,7 +42,11 @@ services:
     build:
       context: .
       dockerfile: Services/Reports/UBA.Panel.Report.FileProcessor.Functions/Dockerfile
-
+    depends_on:
+      - uba.panel.report.database
+      - azurite
+    networks:
+      - uba_panel
 networks:
   uba_panel:
 volumes:

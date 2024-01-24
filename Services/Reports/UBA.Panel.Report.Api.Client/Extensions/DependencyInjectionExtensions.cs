@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using UBA.Panel.Report.Api.Client.Config;
 
 namespace UBA.Panel.Report.Api.Client.Extensions;

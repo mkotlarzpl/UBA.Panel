@@ -7,7 +7,7 @@ services:
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - Database__ConnectionString=Host=reports_db;Database=postgres;Username=postgres;Password=postgres
       - FileStore__ConnectionString=DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1;
-      - FileStore__ContainerName=to-process i
+      - FileStore__ContainerName=to-process
     ports:
       - "80"
       - "443"
